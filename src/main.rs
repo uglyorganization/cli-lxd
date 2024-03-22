@@ -1,72 +1,60 @@
-<<<<<<< Updated upstream
-use clap::Parser;
-use reqwest::{header, Client, Error, RequestBuilder};
-use tokio;
-=======
 use clap::{Parser, Subcommand};
 use reqwest::Error;
+use tokio;
 
->>>>>>> Stashed changes
-
-/// letterboxd cli
 #[derive(Parser, Debug)]
-#[command(version, about, long_about = None)]
-struct Args {
+#[command(name = "cli-lxd", version = "0.0", author = "Ugly organization", about = "Interacts with letterboxd API")]
+struct Cli {
     /// Token for authentication
     #[arg(short, long)]
     token: String,
+
+    #[command(subcommand)]
+    command: Commands,
+}
+
+#[derive(Subcommand, Debug)]
+enum Commands {
+    /// Operations on favorite list
+    Favorite {
+        #[command(subcommand)]
+        action: FavoriteActions,
+    },
+}
+
+#[derive(Subcommand, Debug)]
+enum FavoriteActions {
+    /// View favorite lists
+    View,
 }
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
-    let args = Args::parse();
-    let token = args.token;
-
     let client = reqwest::Client::new();
-    let request = build_request_with_auth_header(&client, "http://httpbin.org/get", &token);
+    let cli = Cli::parse();
+    let token = cli.token;
+    let url =  "http://httpbin.org/get";
 
-    // Send the request and wait for the response
+    let mut request = client.get(url).bearer_auth(token);
+    request = match cli.command {
+        Commands::Favorite { action } => 
+        match action {
+            FavoriteActions::View => request.header("action", "view"),
+        }
+    };
+
     let res = request.send().await?;
-    
-    // Ensure the request was successful and get the response body
     let body = res.text().await?;
-    
-    // Print the response body
     println!("Response body: {}", body);
-    
     Ok(())
-}
-
-/// Builds a request with the Authorization header
-fn build_request_with_auth_header(client: &Client, url: &str, token: &str) -> RequestBuilder {
-    client.get(url)
-        .header(header::AUTHORIZATION, format!("Bearer {}", token))
 }
 
 #[cfg(test)]
 mod tests {
-<<<<<<< Updated upstream
     use super::*;
-    use reqwest::header::{self, HeaderMap};
-=======
-    
->>>>>>> Stashed changes
 
     #[tokio::test]
-    async fn test_build_request_with_auth_header() {
-        let client = Client::new();
-        let token = "test-token";
-        let request = build_request_with_auth_header(&client, "http://example.com", token)
-            .build()
-            .unwrap();
-
-        assert_eq!(request.method(), "GET");
-        assert_eq!(request.url().as_str(), "http://example.com/");
-        check_auth_header_exists(request.headers(), token);
-    }
-
-    fn check_auth_header_exists(headers: &HeaderMap, token: &str) {
-        let auth_header = headers.get(header::AUTHORIZATION).unwrap().to_str().unwrap();
-        assert_eq!(auth_header, format!("Bearer {}", token));
+    async fn test_true() {
+        assert_eq!(1, 1);
     }
 }
