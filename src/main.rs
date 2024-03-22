@@ -1,6 +1,12 @@
+<<<<<<< Updated upstream
 use clap::Parser;
 use reqwest::{header, Client, Error, RequestBuilder};
 use tokio;
+=======
+use clap::{Parser, Subcommand};
+use reqwest::Error;
+
+>>>>>>> Stashed changes
 
 /// letterboxd cli
 #[derive(Parser, Debug)]
@@ -39,8 +45,12 @@ fn build_request_with_auth_header(client: &Client, url: &str, token: &str) -> Re
 
 #[cfg(test)]
 mod tests {
+<<<<<<< Updated upstream
     use super::*;
     use reqwest::header::{self, HeaderMap};
+=======
+    
+>>>>>>> Stashed changes
 
     #[tokio::test]
     async fn test_build_request_with_auth_header() {
